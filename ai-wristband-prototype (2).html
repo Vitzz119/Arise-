@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Smart Drowsiness Bracelet — Prototype UI/UX</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#E6ECF2; --frame:#18242F; --surface:#FFFFFF; --surface2:#F3F6F9;
+  --ink:#12202B; --ink2:#586A7A; --line:#DDE4EB;
+  --pulse:#E5465C; --pulse-soft:#FCE4E8;
+  --ai:#5848E3; --ai-soft:#ECE9FE; --on-ai:#FFFFFF;
+  --ok:#0B9484; --ok-soft:#DCF3EF;
+  --warn:#B86E08; --warn-soft:#FBEED6;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    color-scheme:dark;
+    --bg:#090E13; --frame:#33465A; --surface:#16202A; --surface2:#0F171E;
+    --ink:#EAF0F5; --ink2:#93A5B6; --line:#263543;
+    --pulse:#FF6F82; --pulse-soft:#3A1D25;
+    --ai:#A094FF; --ai-soft:#262250; --on-ai:#14112B;
+    --ok:#3FD0BC; --ok-soft:#133330;
+    --warn:#F1B14D; --warn-soft:#3A2A0E;
+  }
+}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:ui-rounded,"SF Pro Rounded","Segoe UI Variable","Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
+.stage{min-height:100dvh;display:flex;align-items:center;justify-content:center}
+.app{position:relative;width:100%;height:100dvh;background:var(--surface2);display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:520px){
+  .stage{padding:24px}
+  .app{width:390px;height:min(812px,calc(100dvh - 48px));border-radius:40px;border:9px solid var(--frame);box-shadow:0 28px 70px rgba(10,20,30,.28)}
+}
+
+/* App bar */
+.bar{display:flex;align-items:center;gap:4px;padding:8px 12px 6px 8px;padding-top:max(8px,env(safe-area-inset-top))}
+.bar h1{flex:1;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.status{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink2)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ink2);opacity:.5}
+.dot.on{background:var(--ok);opacity:1}
+.icon-btn{width:44px;height:44px;border-radius:14px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center}
+.icon-btn.sm{width:36px;height:36px;color:var(--ink2);flex:none}
+.ic{flex:none}
+
+/* Screen */
+.screen{flex:1;overflow-y:auto;padding:10px 16px 100px;display:flex;flex-direction:column;gap:12px;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen>*{flex:none}
+.screen.chatmode{padding:0;overflow:hidden;gap:0}
+.grow{flex:1;min-width:0}
+h2{font-size:16px;font-weight:700}
+small,.hint{color:var(--ink2);font-size:13px}
+.hint{line-height:1.4}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.empty{color:var(--ink2);text-align:center;padding:24px 12px;list-style:none}
+
+/* Buttons */
+.btn{height:46px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);padding:0 16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.sm{height:38px;padding:0 14px;font-size:14px;border-radius:12px}
+.btn.ai{background:var(--ai);color:var(--on-ai);border-color:transparent}
+.btn.dark{background:var(--ink);color:var(--surface);border-color:transparent}
+.btn:disabled{opacity:.55;cursor:default}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns .btn{flex:1}
+
+/* Pills + tags */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:12.5px;font-weight:700}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.high{background:var(--pulse-soft);color:var(--pulse)}
+.pill.off{background:var(--line);color:var(--ink2)}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.tag.kesehatan{background:var(--ok-soft);color:var(--ok)}
+.tag.pekerjaan{background:var(--warn-soft);color:var(--warn)}
+.tag.ai{background:var(--ai-soft);color:var(--ai)}
+
+/* Home hero */
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:30px;padding-top:18px;overflow:hidden}
+.hero-top{display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+.lbl{font-size:14px;font-weight:700;color:var(--ink2);display:flex;align-items:center;gap:8px}
+.live{width:9px;height:9px;border-radius:50%;background:var(--pulse);animation:beat 1.1s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1);opacity:1}40%{transform:scale(1.5);opacity:.6}}
+.big{display:flex;align-items:baseline;gap:8px;padding:6px 18px 0;font-variant-numeric:tabular-nums}
+.big .n{font-size:76px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.big .u{font-size:17px;font-weight:700;color:var(--ink2)}
+.hero-sub{padding:4px 18px 0;color:var(--ink2);font-size:13.5px}
+#ecg{display:block;width:100%;height:96px;margin-top:8px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 38%);mask-image:linear-gradient(90deg,transparent,#000 38%)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.tile .ti{display:flex;align-items:center;gap:6px;color:var(--ink2);font-size:13px;font-weight:600}
+.tile .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.aicard{background:var(--ai-soft);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.ai-h{display:flex;align-items:center;gap:7px;color:var(--ai);font-weight:700;font-size:14px}
+.aitext{font-size:15px;line-height:1.5}
+.next{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;align-items:center;gap:14px}
+.next .tm{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* Chart */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:3px}
+.seg button{height:38px;border:0;border-radius:12px;background:transparent;color:var(--ink2);font-weight:700}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--surface)}
+.readout{display:flex;align-items:baseline;gap:6px;font-variant-numeric:tabular-nums}
+.readout b{font-size:34px;letter-spacing:-.02em}
+.readout span{color:var(--ink2);font-size:14px;margin-left:4px}
+#chartbox{touch-action:pan-y;cursor:crosshair;border-radius:12px}
+#chart{display:block;width:100%;height:auto}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats .tile{padding:10px 12px}
+
+/* Chips + lists */
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{height:36px;padding:0 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--surface);border-color:transparent}
+.list{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;align-items:center;gap:12px}
+.ico{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none}
+.ico.high{background:var(--pulse-soft);color:var(--pulse)}
+.ico.warn{background:var(--warn-soft);color:var(--warn)}
+.ico.ok{background:var(--ok-soft);color:var(--ok)}
+.ico.ai{background:var(--ai-soft);color:var(--ai)}
+
+/* Schedule */
+.sch .t{font-weight:700;line-height:1.3}
+.sch .time{font-variant-numeric:tabular-nums;color:var(--ink2);margin-right:8px;font-weight:700}
+.sch .tags{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.sch.done .t{text-decoration:line-through;opacity:.5}
+.chk{width:28px;height:28px;border-radius:9px;border:2px solid var(--line);background:transparent;display:grid;place-items:center;flex:none;color:var(--on-ai)}
+.chk[aria-pressed=true]{background:var(--ok);border-color:var(--ok)}
+.vib{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}
+.vib small{font-size:11px;font-weight:600}
+.sw{width:44px;height:26px;border-radius:999px;border:0;background:var(--line);position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.sw[aria-checked=true]{background:var(--ok)}
+.sw[aria-checked=true]::after{transform:translateX(18px)}
+.sug{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:16px;padding:10px 12px}
+.sug p{font-size:13px;color:var(--ink2);margin-top:2px;line-height:1.35}
+
+/* Alerts */
+.acard{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.arow{width:100%;display:flex;align-items:center;gap:12px;padding:12px;border:0;background:transparent;text-align:left}
+.arow b{display:flex;align-items:center;gap:6px}
+.arow small{display:block;line-height:1.3;margin-top:1px}
+.when{font-size:12.5px;color:var(--ink2);font-weight:600;align-self:flex-start;white-space:nowrap}
+.unread{width:8px;height:8px;border-radius:50%;background:var(--pulse);display:inline-block}
+.why{background:var(--ai-soft);margin:0 10px 10px;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.why p{font-size:14px;line-height:1.5}
+.rng{display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center;font-weight:600}
+.rng input{grid-column:1/-1;width:100%;accent-color:var(--ai);height:28px}
+
+/* Connection */
+.band{flex-direction:row;align-items:center;gap:16px}
+.bandart svg{display:block}
+.bandart.shake{animation:shake .5s}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-4px) rotate(-2deg)}40%{transform:translateX(4px) rotate(2deg)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.batt{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin:8px 0 4px}
+.batt i{display:block;height:100%;background:var(--ok)}
+.dev{display:flex;align-items:center;gap:12px}
+
+/* History */
+.dayh{font-size:13px;font-weight:700;color:var(--ink2);margin:6px 2px 0}
+.hrow .tx{font-size:14.5px;line-height:1.35}
+.hrow small{display:block;margin-top:1px}
+
+/* Chat */
+.chat{display:flex;flex-direction:column;height:100%}
+.msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 14px;border-radius:20px;font-size:15px;line-height:1.5}
+.msg.ai{background:var(--ai-soft);align-self:flex-start;border-bottom-left-radius:6px}
+.msg.me{background:var(--ink);color:var(--surface);align-self:flex-end;border-bottom-right-radius:6px}
+.typing{display:flex;gap:4px;padding:14px 16px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--ai);animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+.quick{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 10px;scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.composer{display:flex;gap:8px;padding:10px 12px 4px;border-top:1px solid var(--line);background:var(--surface)}
+.in{height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface2);color:var(--ink);padding:0 14px;font:inherit;font-size:16px;width:100%;min-width:0}
+.send{width:48px;padding:0;flex:none}
+.disc{font-size:12px;color:var(--ink2);text-align:center;padding:2px 12px 10px;background:var(--surface)}
+
+/* FAB */
+.fab{position:absolute;right:16px;bottom:18px;height:54px;padding:0 20px 0 16px;border-radius:27px;border:0;background:var(--ai);color:var(--on-ai);display:flex;align-items:center;gap:8px;font-weight:700;box-shadow:0 10px 24px rgba(88,72,227,.38);z-index:10}
+
+/* Drawer = layar opsi */
+.scrim{position:absolute;inset:0;background:rgba(8,14,20,.5);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+.drawer{position:absolute;top:0;bottom:0;left:0;width:86%;max-width:322px;background:var(--surface);z-index:21;transform:translateX(-102%);visibility:hidden;transition:transform .26s cubic-bezier(.3,.8,.3,1),visibility 0s .26s;display:flex;flex-direction:column;gap:8px;padding:18px 14px;padding-top:max(18px,env(safe-area-inset-top));overflow-y:auto}
+.app.open .scrim{opacity:1;pointer-events:auto}
+.app.open .drawer{transform:none;visibility:visible;transition:transform .26s cubic-bezier(.3,.8,.3,1),visibility 0s}
+.d-head{display:flex;align-items:center;gap:12px;padding:4px 6px 14px;margin-bottom:6px;border-bottom:1.5px solid var(--line)}
+.logo{width:46px;height:46px;border-radius:15px;background:var(--ink);color:var(--surface);display:grid;place-items:center;flex:none}
+.d-head b{font-size:18px;display:block;letter-spacing:-.01em}
+.d-head small{display:flex;align-items:center;gap:6px}
+.nav{display:flex;align-items:center;gap:12px;height:50px;padding:0 14px;border-radius:17px;border:1.5px solid var(--line);background:transparent;font-weight:700;width:100%;text-align:left;flex:none}
+.nav[aria-current=page]{background:var(--ink);color:var(--surface);border-color:transparent}
+.badge{margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--pulse);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.d-sec{margin:14px 6px 2px;font-size:13px;font-weight:700;color:var(--ink2)}
+.d-row{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px solid var(--line);font-size:14px}
+.d-row span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-row small{flex:none}
+
+/* Sheet + toast */
+.sheet-wrap{position:absolute;inset:0;z-index:30;display:none;align-items:flex-end;background:rgba(8,14,20,.5)}
+.sheet-wrap.open{display:flex}
+.sheet{width:100%;background:var(--surface);border-radius:28px 28px 0 0;padding:18px 16px 22px;display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+.toast{position:absolute;left:16px;right:16px;bottom:86px;background:var(--ink);color:var(--surface);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .22s,opacity .22s;z-index:40}
+.toast.show{transform:none;opacity:1;pointer-events:auto}
+.toast button{margin-left:auto;background:none;border:0;text-decoration:underline;font-weight:700}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="app" id="app">
+    <header class="bar">
+      <button class="icon-btn" data-act="drawer" aria-label="Buka layar opsi" id="menuBtn"></button>
+      <h1 id="title">Smart Bracelet</h1>
+      <div class="status" id="status"></div>
+    </header>
+    <main class="screen" id="screen"></main>
+    <button class="fab" id="fab" data-act="ai" aria-label="Buka asisten AI"></button>
+    <div class="scrim" data-act="drawer-close"></div>
+    <aside class="drawer" id="drawer" aria-label="Layar opsi"></aside>
+    <div class="sheet-wrap" id="sheet" data-act="sheet-bg"></div>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- Smart Drowsiness Bracelet: dashboard logic ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const app=$('#app');
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+const avg=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null;
+const nowLabel=()=>{const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`};
+const ICONS={
+ menu:'<path d="M4 7h16M4 12h16M4 17h10"/>',home:'<path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/>',chart:'<path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 14l4-4 3 3 5-6"/>',calendar:'<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',bell:'<path d="M6 17v-6a6 6 0 0112 0v6l1.5 2h-15z"/><path d="M10 21h4"/>',wifi:'<path d="M2 9a15 15 0 0120 0"/><path d="M5 12.5a10 10 0 0114 0"/><path d="M8.5 16a5 5 0 017 0"/><path d="M12 19.5h.01"/>',history:'<path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7L4 9"/><path d="M4 4v5h5"/><path d="M12 8v4l3 2"/>',spark:'<path d="M11 3l1.9 5.1L18 10l-5.1 1.9L11 17l-1.9-5.1L4 10l5.1-1.9z"/><path d="M18 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>',plus:'<path d="M12 5v14M5 12h14"/>',trash:'<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>',send:'<path d="M4 12l16-8-6 16-3-7z"/>',close:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',vibrate:'<rect x="8" y="4" width="8" height="16" rx="2"/><path d="M4 8v8M20 8v8"/>',drop:'<path d="M12 3s6 6.2 6 10.5A6 6 0 016 13.5C6 9.2 12 3 12 3z"/>',walk:'<circle cx="13" cy="5" r="2"/><path d="M10 21l2-6-2-3 1-4 4 2 2 3M9 12l-3 2"/>',thermo:'<path d="M10 14V5a2 2 0 014 0v9a4 4 0 11-4 0z"/>',moon:'<path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/>',battery:'<rect x="3" y="8" width="16" height="8" rx="2"/><path d="M21 11v2"/>',refresh:'<path d="M20 11a8 8 0 00-14-4L4 9"/><path d="M4 4v5h5"/><path d="M4 13a8 8 0 0014 4l2-2"/><path d="M20 20v-5h-5"/>',band:'<rect x="9" y="2" width="6" height="20" rx="3"/><rect x="6" y="7" width="12" height="10" rx="4"/>'
+};
+const ic=(n,s=20)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||ICONS.spark}</svg>`;
+const NAV=[['home','Home','home'],['chart','Grafik sensor','chart'],['analysis','Analisis','spark'],['alerts','Peringatan','bell'],['connect','Koneksi','wifi'],['history','Riwayat','history']];
+const TITLES={home:'Smart Bracelet',chart:'Grafik sensor',analysis:'Analisis pola',alerts:'Peringatan',connect:'Koneksi',history:'Riwayat',ai:'Asisten AI'};
+const S={screen:'home',simulation:true,connected:false,device:'SDB-ESP32-01',hr:74,edaRaw:1800,edaBase:1750,edaChange:2.9,valid:true,status:0,stamp:nowLabel(),samples:[],alerts:[],history:[],expanded:null,range:'day',metric:'hr',sel:0,chat:[{role:'ai',text:'Halo! Aku asisten Smart Drowsiness Bracelet. Aku membantu menjelaskan data denyut nadi dan perubahan EDA/GSR sebagai indikator awal. Sistem ini bukan alat diagnosis dan belum menggunakan model AI terlatih.'}],aiBusy:false,scanning:false,found:[],lastSync:'belum ada data perangkat',confirm:0,normalConfirm:0};
+const statusInfo={0:{label:'AMAN',cls:'ok'},1:{label:'WASPADA',cls:'warn'},2:{label:'BAHAYA',cls:'high'},3:{label:'DATA TIDAK TERSEDIA',cls:'off'}};
+function addHistory(type,text){S.history.unshift({id:Date.now()+Math.random(),time:nowLabel(),day:'Hari ini',type,text,source:S.simulation?'SIMULASI':(S.valid?'PERANGKAT':'OFFLINE')});S.history=S.history.slice(0,100)}
+function recordSample(){if(!S.valid)return;S.samples.push({time:nowLabel(),hr:S.hr,eda:S.edaRaw,change:S.edaChange,status:S.status,source:S.simulation?'SIMULASI':(S.valid?'PERANGKAT':'OFFLINE')});if(S.samples.length>120)S.samples.shift()}
+function computeStatus(){
+ if(!S.valid||S.hr==null||S.edaChange==null){S.status=3;return}
+ // Thresholds are prototype experiment settings, not medical criteria.
+ const danger=(S.hr<60 && S.edaChange>=10)||(S.hr<=55)||(S.edaChange>=18);
+ const warning=(S.hr<=65)||(S.edaChange>=10);
+ if(danger){S.confirm++;S.normalConfirm=0;if(S.confirm>=3)S.status=2;else S.status=Math.max(S.status===3?0:S.status,1)}
+ else if(warning){S.confirm=0;S.normalConfirm=0;S.status=1}
+ else {S.confirm=0;S.normalConfirm++;if(S.normalConfirm>=3)S.status=0;else if(S.status===3)S.status=0}
+}
+function simulateTick(){
+ if(!S.simulation)return;
+ const old=S.status;
+ S.hr=Math.max(48,Math.min(105,S.hr+Math.round((Math.random()-.5)*4)));
+ S.edaRaw=Math.max(500,Math.min(3500,S.edaRaw+Math.round((Math.random()-.5)*38)));
+ S.edaChange=Math.round(((S.edaRaw-S.edaBase)/Math.max(S.edaBase,1))*1000)/10;
+ S.valid=true;S.stamp=nowLabel();computeStatus();recordSample();
+ if(old!==S.status){const label=statusInfo[S.status].label;addHistory('alert',`Status berubah menjadi ${label} (data simulasi)`);if(S.status===1||S.status===2)S.alerts.unshift({id:Date.now(),level:S.status===2?'high':'mid',title:`Status ${label}`,detail:`BPM ${S.hr}; perubahan EDA ${S.edaChange}%`,time:S.stamp,read:false,why:explainCurrent()});}
+ if(S.screen==='home')updateHomeLive();
+}
+function explainCurrent(){
+ if(!S.valid)return 'Data sensor belum tersedia. Periksa koneksi perangkat dan kualitas kontak sensor.';
+ const reasons=[];if(S.hr<=65)reasons.push(`denyut nadi ${S.hr} BPM berada pada rentang ambang eksperimen`);if(S.edaChange>=10)reasons.push(`perubahan EDA ${S.edaChange}% dibanding baseline melewati ambang eksperimen`);if(!reasons.length)return 'Indikator pada sampel saat ini belum melewati aturan peringatan prototipe.';
+ return `Aturan prototipe menandai ${reasons.join(' dan ')}. Ini hanya indikator fisiologis tidak spesifik; aktivitas, stres, suhu, gerakan, serta kontak sensor juga dapat memengaruhi hasil. Bukan konfirmasi bahwa pengguna mengantuk.`;
+}
+function insightText(){if(!S.valid)return 'Belum ada data sensor valid untuk dianalisis. Hubungkan perangkat atau aktifkan mode simulasi.';return `Data ${S.simulation?'simulasi':'perangkat'} terakhir menunjukkan denyut nadi ${S.hr} BPM dan perubahan EDA ${S.edaChange}% dari baseline. Status prototipe: ${statusInfo[S.status].label}. ${explainCurrent()}`}
+function ctx(){return `Sumber data: ${S.simulation?'SIMULASI WOKWI/DEMO':'PERANGKAT (belum diverifikasi)'}; valid: ${S.valid}; BPM: ${S.valid?S.hr:'tidak tersedia'}; GSR raw ADC: ${S.valid?S.edaRaw:'tidak tersedia'}; perubahan EDA relatif baseline: ${S.valid?S.edaChange+'%':'tidak tersedia'}; status rule-based: ${statusInfo[S.status].label}; waktu sampel: ${S.stamp}.`}
+function localAI(q){const t=q.toLowerCase();if(/eda|gsr|konduktiv|kulit/.test(t))return S.valid?`Nilai simulasi GSR/EDA saat ini ${S.edaRaw} ADC dengan perubahan relatif baseline ${S.edaChange}%. Nilai ADC/voltase tidak bisa langsung diterjemahkan menjadi tingkat kantuk; kontak elektroda, gerakan, suhu, dan stres dapat mengubahnya.`:'Data GSR/EDA belum tersedia karena sensor tidak valid atau simulasi berhenti.';if(/bpm|denyut|nadi|jantung/.test(t))return S.valid?`Denyut nadi yang tersedia adalah ${S.hr} BPM (${S.simulation?'data simulasi':'data perangkat'}). Nilai ini perlu dibaca bersama perubahan EDA dan konteks aktivitas; BPM saja tidak cukup untuk menentukan kantuk.`:'BPM tidak tersedia. Periksa koneksi atau aktifkan mode simulasi.';if(/status|kantuk|mengantuk|bahaya|waspada|aman/.test(t))return insightText();if(/sensor|koneksi|terputus/.test(t))return S.simulation?'Mode simulasi sedang aktif; web ini belum tersambung langsung ke ESP32. Nilai yang terlihat bukan pembacaan sensor fisik.':'Tidak ada koneksi perangkat aktif. Data ditandai tidak tersedia, bukan dianggap aman.';return `Aku bisa menjelaskan BPM, GSR/EDA, status rule-based, validitas data, dan batasan sistem. ${ctx()} Model machine learning belum dilatih/tervalidasi; analisis saat ini menggunakan aturan sederhana.`}
+function unread(){return S.alerts.filter(a=>!a.read).length}
+function vHome(){const st=statusInfo[S.status];return `<section class="hero" aria-label="Denyut nadi langsung"><div class="hero-top"><span class="lbl"><i class="live"></i>Denyut nadi</span><span class="pill ${st.cls}" id="zone">${st.label}</span></div><div class="big"><span class="n" id="hr-now">${S.valid?S.hr:'--'}</span><span class="u">BPM</span></div><div class="hero-sub">${S.valid?`Sampel terakhir ${S.stamp} · ${S.simulation?'MODE SIMULASI':'PERANGKAT'}`:'Tidak ada data sensor valid'}</div><canvas id="ecg" aria-hidden="true"></canvas></section>
+ <div class="grid2"><div class="tile"><span class="ti">${ic('heart',16)}Denyut nadi</span><span class="v">${S.valid?S.hr+' BPM':'--'}</span><small>MAX30102 / PPG</small></div><div class="tile"><span class="ti">${ic('drop',16)}Perubahan EDA</span><span class="v">${S.valid?`${S.edaChange>0?'+':''}${S.edaChange}%`:'--'}</span><small>Dibanding baseline</small></div><div class="tile"><span class="ti">${ic('chart',16)}GSR mentah</span><span class="v">${S.valid?S.edaRaw:'--'}</span><small>ADC simulasi/aktual</small></div><div class="tile"><span class="ti">${ic('wifi',16)}Validitas sensor</span><span class="v" style="font-size:18px">${S.valid?'VALID':'TIDAK VALID'}</span><small>${S.simulation?'Sumber: simulasi':'Sumber: perangkat'}</small></div></div>
+ <section class="aicard"><div class="ai-h">${ic('spark',18)}<span>Analisis AI</span></div><p class="aitext">${esc(insightText())}</p><button class="btn ai" data-act="nav" data-id="analysis">Lihat analisis</button></section>
+ <section class="next"><span class="ico ${st.cls==='ok'?'ok':st.cls==='high'?'high':'warn'}">${ic('bell',20)}</span><div class="grow"><b>Status prototipe: ${st.label}</b><small style="display:block">Aturan eksperimen, bukan diagnosis kantuk</small></div><button class="btn sm" data-act="nav" data-id="alerts">Detail</button></section>
+ <p class="hint">${S.simulation?'Mode simulasi aktif. Angka yang tampil bukan pengukuran tubuh nyata.':'Belum ada koneksi sensor aktif; nilai tidak tersedia.'}</p>`}
+let CH=null;
+function chartVals(){const arr=S.samples.slice(-24);return arr.length?arr:[{time:'--:--:--',hr:S.hr,change:S.edaChange,eda:S.edaRaw}].filter(()=>S.valid)}
+function chartHTML(){const rows=chartVals(),key=S.metric==='hr'?'hr':'change',vals=rows.map(r=>Number(r[key])).filter(Number.isFinite);if(!vals.length)return '<p class="empty">Belum ada sampel valid untuk grafik.</p>';const W=340,H=190,L=36,R=12,T=12,B=28;let lo=Math.floor(Math.min(...vals)-2),hi=Math.ceil(Math.max(...vals)+2);if(hi===lo)hi=lo+1;const x=i=>L+i*(W-L-R)/Math.max(1,vals.length-1),y=v=>T+(hi-v)*(H-T-B)/(hi-lo);let grid='';for(let j=0;j<=4;j++){const v=lo+(hi-lo)*j/4;grid+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-5}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--ink2)">${v.toFixed(0)}</text>`}let d=vals.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v)}`).join(' ');CH={x,y,n:vals.length,vals,W,L,R,rows};const ticks=[0,Math.floor((vals.length-1)/2),vals.length-1].filter((v,i,a)=>a.indexOf(v)===i);return `<svg id="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafik ${S.metric==='hr'?'denyut nadi BPM':'perubahan EDA persen'}">${grid}<path d="${d}" fill="none" stroke="var(--pulse)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>${vals.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="${i===S.sel?4:2}" fill="var(--pulse)"/>`).join('')}${ticks.map(i=>`<text x="${x(i)}" y="${H-7}" text-anchor="middle" font-size="10" fill="var(--ink2)">${esc(rows[i]?.time||'')}</text>`).join('')}</svg>`}
+function vChart(){const rows=chartVals(),vals=rows.map(r=>Number(S.metric==='hr'?r.hr:r.change)).filter(Number.isFinite);return `<div class="seg" role="group" aria-label="Pilih data grafik"><button data-act="metric" data-id="hr" aria-pressed="${S.metric==='hr'}">Denyut nadi</button><button data-act="metric" data-id="eda" aria-pressed="${S.metric==='eda'}">EDA / GSR</button></div><section class="card"><div class="readout"><b>${vals.length?vals[Math.min(S.sel,vals.length-1)].toFixed(S.metric==='hr'?0:1):'--'}</b><span>${S.metric==='hr'?'BPM':'% perubahan EDA'}</span></div><div id="chartbox" tabindex="0" aria-label="Grafik data sensor">${chartHTML()}</div><p class="hint">Menampilkan maksimal 24 sampel terakhir. Sumber: ${S.simulation?'SIMULASI':'PERANGKAT'}.</p></section><div class="stats"><div class="tile"><span class="ti">Rata-rata</span><span class="v">${vals.length?avg(vals).toFixed(S.metric==='hr'?0:1):'--'}</span></div><div class="tile"><span class="ti">Terendah</span><span class="v">${vals.length?Math.min(...vals).toFixed(S.metric==='hr'?0:1):'--'}</span></div><div class="tile"><span class="ti">Tertinggi</span><span class="v">${vals.length?Math.max(...vals).toFixed(S.metric==='hr'?0:1):'--'}</span></div></div><section class="aicard"><div class="ai-h">${ic('spark',18)}<span>Analisis data</span></div><p class="aitext">${esc(insightText())}</p><button class="btn ai" data-act="nav" data-id="analysis">Buka analisis pola</button></section>`}
+function vAnalysis(){return `<section class="aicard"><div class="ai-h">${ic('spark',18)}<span>Analisis pola fisiologis</span></div><p class="aitext">${esc(insightText())}</p><p class="hint">Analisis saat ini bersifat rule-based dan dapat dijelaskan. AI/ML belum dilatih atau divalidasi; jangan menganggap status sebagai kepastian kantuk.</p></section><section class="card"><h2>Data yang digunakan</h2><div class="row"><span class="ico high">${ic('heart',20)}</span><div class="grow"><b>Denyut nadi (BPM)</b><small style="display:block">Dari sinyal PPG MAX30102; validitas tergantung algoritma dan kontak kulit.</small></div><b>${S.valid?S.hr:'--'}</b></div><div class="row"><span class="ico ai">${ic('drop',20)}</span><div class="grow"><b>GSR / EDA</b><small style="display:block">Perubahan konduktivitas kulit relatif terhadap baseline.</small></div><b>${S.valid?S.edaChange+'%':'--'}</b></div><div class="row"><span class="ico ok">${ic('check',20)}</span><div class="grow"><b>Validitas data</b><small style="display:block">Data tidak valid tidak boleh dianggap AMAN.</small></div><b>${S.valid?'Valid':'Invalid'}</b></div></section><section class="card"><h2>Aturan eksperimen aktif</h2><p class="hint">• WASPADA: BPM ≤ 65 atau perubahan EDA ≥ 10%.<br>• BAHAYA: kondisi ekstrem/berulang sesuai logika prototipe.<br>• AMAN: indikator tidak melewati ambang selama konfirmasi.<br><br>Ambang ini hanya untuk menguji alur program, bukan batas medis atau bukti kantuk.</p><button class="btn" data-act="ask" data-q="Jelaskan batasan aturan status saat ini">Tanyakan batasan ke AI</button></section>`}
+function vAlerts(){if(!S.alerts.length)return `<section class="card"><h2>Belum ada peringatan</h2><p class="hint">Peringatan akan dicatat ketika status prototipe berubah. Pada mode simulasi, peringatan hanya berasal dari data buatan.</p></section>`;return `<ul class="list">${S.alerts.slice(0,30).map(a=>{const open=S.expanded===a.id,m=a.level==='high'?{c:'high',i:'bell'}:{c:'warn',i:'heart'};return `<li class="acard"><button class="arow" data-act="alert-open" data-id="${a.id}" aria-expanded="${open}"><span class="ico ${m.c}">${ic(m.i,20)}</span><span class="grow"><b>${esc(a.title)}${a.read?'':'<i class="unread"></i>'}</b><small>${esc(a.detail)}</small></span><span class="when">${esc(a.time)}</span></button>${open?`<div class="why"><div class="ai-h">${ic('spark',16)}<span>Penjelasan aturan</span></div><p>${esc(a.why)}</p><p class="hint">Sumber data: ${esc(S.simulation?'SIMULASI':'PERANGKAT')}.</p><div class="btns"><button class="btn sm ai" data-act="alert-ask" data-id="${a.id}">Tanya AI</button><button class="btn sm" data-act="alert-read" data-id="${a.id}">${a.read?'Sudah dibaca':'Tandai dibaca'}</button></div></div>`:''}</li>`}).join('')}</ul><button class="btn" data-act="clear-alerts">Hapus riwayat peringatan</button>`}
+const BAND=`<svg viewBox="0 0 120 150" width="84" height="106" aria-hidden="true"><rect x="40" y="0" width="40" height="150" rx="14" fill="var(--line)"/><rect x="20" y="38" width="80" height="74" rx="22" fill="var(--ink)"/><rect x="28" y="46" width="64" height="58" rx="15" fill="var(--surface2)"/><path d="M36 76h11l5-13 8 26 6-19 4 6h14" stroke="var(--pulse)" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function vConnect(){return `<section class="card band"><div class="bandart">${BAND}</div><div class="grow"><h2>${esc(S.device)}</h2><span class="pill ${S.simulation?'warn':'off'}">${S.simulation?'Mode simulasi aktif':'Perangkat belum terhubung'}</span><small>${S.simulation?'Demo data aktif — bukan sensor fisik':'Tidak ada data perangkat'}<br>Update terakhir ${S.stamp}</small></div></section><div class="btns"><button class="btn ai" data-act="sim-toggle">${S.simulation?'Matikan simulasi':'Aktifkan simulasi'}</button><button class="btn" data-act="export">Ekspor CSV</button></div><section class="card"><h2>Status integrasi</h2><div class="dev"><span class="ico ${S.simulation?'warn':'ok'}">${ic('wifi',20)}</span><div class="grow"><b>ESP32 / MAX30102 / GSR-EDA</b><small style="display:block">${S.simulation?'Belum terhubung; menggunakan nilai demo':'Belum terhubung ke jaringan Wi-Fi'}</small></div></div><div class="dev"><span class="ico ai">${ic('chart',20)}</span><div class="grow"><b>Wi-Fi</b><small style="display:block">Belum terintegrasi di prototipe HTML ini; ESP32 akan mengirim data lewat jaringan Wi-Fi</small></div></div><p class="hint">Rancangan integrasi: MAX30102 + GSR/EDA → ESP32 → status dan peringatan lokal → Wi-Fi → smartphone/dashboard. UI ini belum menerima data live dari ESP32.</p></section><section class="card"><h2>Uji data</h2><p class="hint">Hentikan simulasi untuk memeriksa apakah UI menampilkan data tidak tersedia, bukan nilai normal palsu.</p><button class="btn" data-act="sensor-invalid">Simulasikan sensor tidak valid</button><button class="btn" data-act="sensor-valid">Pulihkan data demo</button></section>`}
+function vHistory(){if(!S.history.length)return '<p class="empty">Belum ada riwayat sampel. Jalankan mode simulasi atau hubungkan perangkat setelah integrasi dibuat.</p>';return `<div class="btns"><button class="btn" data-act="export">Ekspor CSV</button><button class="btn" data-act="clear-history">Hapus riwayat</button></div>${S.history.slice(0,60).map(h=>`<div class="dayh">${esc(h.day)} · ${esc(h.source)}</div><ul class="list"><li class="row hrow"><span class="ico ${h.type==='alert'?'high':'ai'}">${ic(h.type==='alert'?'bell':'chart',20)}</span><div class="grow"><div class="tx">${esc(h.text)}</div><small>${esc(h.time)} · ${esc(h.source)}</small></div></li></ul>`).join('')}`}
+function vAI(){const q=['Jelaskan BPM saat ini','Apa arti perubahan EDA?','Mengapa status menjadi WASPADA?','Apakah ini memastikan kantuk?'];return `<div class="chat"><div class="msgs" id="msgs" aria-live="polite"></div><div class="quick">${q.map(t=>`<button class="chip" data-act="ask" data-q="${esc(t)}">${esc(t)}</button>`).join('')}</div><div class="composer"><input class="in" id="q" type="text" placeholder="Tanya BPM, EDA/GSR, atau status" enterkeyhint="send" autocomplete="off" aria-label="Pesan untuk AI"><button class="btn ai send" data-act="send" aria-label="Kirim">${ic('send',20)}</button></div><p class="disc">AI penjelas prototipe · bukan diagnosis · model ML belum tervalidasi</p></div>`}
+const VIEWS={home:vHome,chart:vChart,analysis:vAnalysis,alerts:vAlerts,connect:vConnect,history:vHistory,ai:vAI};
+function renderDrawer(){const u=unread();$('#drawer').innerHTML=`<div class="d-head"><span class="logo">${ic('band',26)}</span><div><b>Smart Drowsiness Bracelet</b><small><span class="dot ${S.simulation?'on':''}"></span>${S.simulation?'Mode simulasi':'Belum terhubung'}</small></div></div>${NAV.map(([k,l,i])=>`<button class="nav" data-act="nav" data-id="${k}" ${S.screen===k?'aria-current="page"':''}>${ic(i,20)}${l}${k==='alerts'&&u?`<span class="badge">${u}</span>`:''}</button>`).join('')}<button class="nav" data-act="nav" data-id="ai" ${S.screen==='ai'?'aria-current="page"':''} style="margin-top:6px;border-color:var(--ai);color:var(--ai)">${ic('spark',20)}Asisten AI</button><div class="d-sec">Status data</div><div class="d-row"><span>Denyut nadi</span><small>${S.valid?S.hr+' BPM':'--'}</small></div><div class="d-row"><span>Perubahan EDA</span><small>${S.valid?S.edaChange+'%':'--'}</small></div><div class="d-row"><span>Mode</span><small>${S.simulation?'Simulasi':'Tidak aktif'}</small></div>`}
+function renderStatus(){$('#status').innerHTML=`<span class="dot ${S.simulation?'on':''}"></span>${S.simulation?'DEMO':'OFFLINE'}`}
+function render(){stopEcg();$('#title').textContent=TITLES[S.screen]||'Smart Bracelet';const sc=$('#screen');sc.className='screen'+(S.screen==='ai'?' chatmode':'');sc.innerHTML=VIEWS[S.screen]();$('#fab').hidden=S.screen==='ai';renderStatus();renderDrawer();if(S.screen==='home')startEcg();if(S.screen==='ai')drawMsgs()}
+function go(s){S.screen=s;closeDrawer();render();$('#screen').scrollTop=0}
+function openDrawer(){app.classList.add('open');$('#drawer').inert=false}function closeDrawer(){app.classList.remove('open');$('#drawer').inert=true}
+let toastT;function toast(msg,label,fn){const t=$('#toast');t.innerHTML=`<span>${esc(msg)}</span>${label?`<button data-act="toast-act">${esc(label)}</button>`:''}`;t._fn=fn;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),4200)}
+let ecgRAF=0;function stopEcg(){cancelAnimationFrame(ecgRAF);ecgRAF=0}function startEcg(){const cv=$('#ecg');if(!cv)return;const c=cv.getContext('2d'),dpr=Math.min(window.devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;cv.width=w*dpr;cv.height=h*dpr;c.scale(dpr,dpr);if(!S.valid){c.clearRect(0,0,w,h);return}const color=getComputedStyle(cv).getPropertyValue('--pulse').trim()||'#e5465c';let phase=0;function draw(){c.clearRect(0,0,w,h);c.beginPath();c.lineWidth=2.5;c.strokeStyle=color;for(let x=0;x<w;x++){const p=(x/w*4+phase)%1;const y=h*.68-(Math.sin(p*2*Math.PI)*2+Math.exp(-Math.pow((p-.5)*40,2))*18);x?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){phase+=.006;ecgRAF=requestAnimationFrame(draw)}}draw()}
+function updateHomeLive(){const hr=$('#hr-now');if(hr)hr.textContent=S.valid?S.hr:'--';const z=$('#zone');if(z){z.textContent=statusInfo[S.status].label;z.className='pill '+statusInfo[S.status].cls}}
+function downloadCSV(){const rows=[['timestamp','heart_rate_bpm','gsr_raw_adc','eda_change_pct','status','sensor_valid','source'],...S.samples.map(x=>[x.time,x.hr,x.eda,x.change,statusInfo[x.status]?.label||'UNKNOWN',true,x.source])];const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='smart-drowsiness-bracelet-data.csv';a.click();URL.revokeObjectURL(url);toast('Ekspor CSV dibuat dari data yang tersedia')}
+async function sendChat(text){text=(text||'').trim();if(!text||S.aiBusy)return;S.chat.push({role:'user',text});S.aiBusy=true;drawMsgs();await new Promise(r=>setTimeout(r,180));S.chat.push({role:'ai',text:localAI(text)});S.aiBusy=false;drawMsgs()}
+function drawMsgs(){const box=$('#msgs');if(!box)return;box.innerHTML=S.chat.map(m=>`<div class="msg ${m.role==='ai'?'ai':'me'}">${fmt(m.text)}</div>`).join('')+(S.aiBusy?'<div class="msg ai typing"><i></i><i></i><i></i></div>':'');box.scrollTop=box.scrollHeight}
+const ACT={drawer:()=>app.classList.contains('open')?closeDrawer():openDrawer(),'drawer-close':closeDrawer,nav:(t,id)=>go(id),ai:()=>go('ai'),ask:(t)=>{if(S.screen!=='ai')go('ai');sendChat(t.dataset.q)},send:()=>{const q=$('#q'),v=q?.value||'';if(q)q.value='';sendChat(v)},metric:(t,id)=>{S.metric=id;S.sel=Math.max(0,chartVals().length-1);render()},'alert-open':(t,id)=>{S.expanded=S.expanded==id?null:Number(id);render()},'alert-read':(t,id)=>{const a=S.alerts.find(a=>a.id==id);if(a)a.read=true;render()},'alert-ask':(t,id)=>{const a=S.alerts.find(a=>a.id==id);go('ai');sendChat(a?`Jelaskan peringatan ini: ${a.title}. ${a.detail}. ${a.why}`:'Jelaskan peringatan terbaru')},'sim-toggle':()=>{S.simulation=!S.simulation;if(S.simulation){S.valid=true;S.stamp=nowLabel();computeStatus();recordSample();addHistory('sync','Mode simulasi diaktifkan')}else{S.valid=false;S.hr=null;S.edaRaw=null;S.edaChange=null;S.status=3;S.stamp=nowLabel();addHistory('sync','Simulasi dihentikan; data ditandai tidak tersedia')}render();toast(S.simulation?'Mode simulasi aktif':'Simulasi berhenti; data tidak tersedia')},'sensor-invalid':()=>{S.simulation=false;S.valid=false;S.hr=null;S.edaRaw=null;S.edaChange=null;S.status=3;S.stamp=nowLabel();addHistory('alert','Sensor ditandai tidak valid');render();toast('Data tidak valid — tidak dianggap AMAN')},'sensor-valid':()=>{S.simulation=true;S.valid=true;S.hr=74;S.edaRaw=1800;S.edaChange=2.9;S.stamp=nowLabel();S.status=0;S.confirm=0;recordSample();addHistory('sync','Data demo dipulihkan');render();toast('Data simulasi dipulihkan')},export:downloadCSV,'clear-history':()=>{S.history=[];render();toast('Riwayat dibersihkan')},'clear-alerts':()=>{S.alerts=[];render();toast('Peringatan dibersihkan')},'toast-act':()=>{const t=$('#toast');t.classList.remove('show');t._fn&&t._fn()}};
+app.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const f=ACT[t.dataset.act];if(f)f(t,t.dataset.id,e)});
+app.addEventListener('keydown',e=>{if(e.target.id==='q'&&e.key==='Enter'){e.preventDefault();ACT.send()}if(e.key==='Escape'){closeDrawer()}});
+$('#menuBtn').innerHTML=ic('menu',24);$('#fab').innerHTML=ic('spark',22)+'<span>Tanya AI</span>';$('#drawer').inert=true;
+S.edaChange=Math.round(((S.edaRaw-S.edaBase)/S.edaBase)*1000)/10;S.status=0;recordSample();addHistory('sync','Prototipe dashboard dibuka; data awal berlabel SIMULASI');
+render();setInterval(simulateTick,2500);
+
+</script>
+</body>
+</html>
